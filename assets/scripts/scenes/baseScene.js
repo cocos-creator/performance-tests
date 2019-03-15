@@ -106,23 +106,25 @@ cc.Class({
         result += `max time: ${maxValue}, min time: ${minValue}, avg time: ${avgValue}`;
         if (config.IS_AUTO_TESTING) {
             let testCaseInfo = config.TEST_CASE[config.CURRENT_CASE];
-            config.AUTO_TEST_RESULT.data[testCaseInfo.index] = {
+            utils.setDataToLS({
                 name: testCaseInfo.name,
                 maxTime: maxValue,
                 minTime: minValue,
                 avgValue: avgValue
-            }
-            config.AUTO_CASE_CURSOR ++;
-            testCaseInfo = config.AUTO_TEST_CASE[config.AUTO_CASE_CURSOR];
-            if (testCaseInfo) {
-                config.CURRENT_CASE = testCaseInfo.index;
-                config.setSceneArgs(testCaseInfo);
-                cc.director.loadScene(testCaseInfo.scene);
+            });
+            let urlArgs = utils.getUrlArgs();
+            let curIndex = parseInt(urlArgs.caseIndex) || -1;   
+            let nextAutoTestCaseIndex = utils.getNextAutoTestCaseIndex(parseInt(curIndex));
+            if (nextAutoTestCaseIndex !== -1) {
+                this.scheduleOnce(()=>{
+                    window.location.replace(window.location.origin + window.location.pathname + "?autoTest=true&caseIndex=" + nextAutoTestCaseIndex);
+                }, 1);
             }else {
                 config.IS_AUTO_TESTING = false;
-                cc.director.loadScene("main");
-                cc.log(config.AUTO_TEST_RESULT);
-                utils.post(config.AUTO_TEST_POST_URL, config.AUTO_TEST_RESULT);
+                cc.director.loadScene("end");
+                let performanceData = utils.getDataFromLS();
+                cc.log(performanceData);
+                utils.post(config.AUTO_TEST_POST_URL, performanceData);
             }
         }else {
             this.labelResult.getComponent(cc.Label).string = result;

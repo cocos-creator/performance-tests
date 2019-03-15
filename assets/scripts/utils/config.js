@@ -142,7 +142,7 @@ config.TEST_CASE = [
             android_qq: { count: 20 },
             default: { count: 20 }
         },
-        auto: true,
+        auto: false,
     },
     {
         name: "UI Test",
@@ -212,10 +212,6 @@ config.HIGHEST_ZINDEX = 65500;
 config.SCENE_ARGS = null;
 
 config.IS_AUTO_TESTING = false;
-
-config.AUTO_CASE_CURSOR = 0;
-
-config.AUTO_TEST_RESULT = {};
 
 config.AUTO_TEST_POST_URL = "http://192.168.52.104:30000/upload_result";
 

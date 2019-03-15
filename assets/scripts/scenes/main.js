@@ -1,4 +1,5 @@
 let config = require("config");
+let utils = require("utils");
 
 cc.Class({
     extends: cc.Component,
@@ -27,6 +28,21 @@ cc.Class({
         }
     },
 
+    start: function () {
+        /*
+         * urlArgs = {
+         *   autoTest: true,
+         *   caseIndex: 0,
+         * }
+         */
+        let urlArgs = utils.getUrlArgs();
+        if (urlArgs.autoTest) {
+            this._starAutoTestWithCaseIndex(parseInt(urlArgs.caseIndex));
+        }else {
+            utils.clearLS();
+        }
+    },
+
     onClickTestCase: function (_, data) {
         let testCaseIndex = parseInt(data);
         let testCaseInfo = config.TEST_CASE[testCaseIndex];
@@ -45,27 +61,26 @@ cc.Class({
             alert("Please input SN...");
             return;
         }
-        config.IS_AUTO_TESTING = true;
-        config.AUTO_CASE_CURSOR = 0;
-        config.AUTO_TEST_CASE = [];
-        config.AUTO_TEST_RESULT = {
+        config.CURRENT_CASE = -1;
+        let autoTestResult = {
             os: cc.sys.os,
             browser: cc.sys.browserType,
             sn: sn,
             data: []
         };
-        for (let i = 0; i < config.TEST_CASE.length; i++) {
-            let testCaseInfo = config.TEST_CASE[i];
-            if (testCaseInfo.auto) {
-                config.AUTO_TEST_CASE.push(testCaseInfo);
-            }
+        utils.setDataToLS(autoTestResult);
+        let nextAutoTestCaseIndex = utils.getNextAutoTestCaseIndex(-1);
+        if (nextAutoTestCaseIndex !== - 1) {
+            this._starAutoTestWithCaseIndex(nextAutoTestCaseIndex); 
         }
-        if (config.AUTO_TEST_CASE.length) {
-            let testCaseInfo = config.AUTO_TEST_CASE[config.AUTO_CASE_CURSOR];
-            config.CURRENT_CASE = testCaseInfo.index;
-            config.setSceneArgs(testCaseInfo);
-            cc.director.loadScene(testCaseInfo.scene);
-        }
+    },
+
+    _starAutoTestWithCaseIndex: function (caseIndex) {
+        config.IS_AUTO_TESTING = true;
+        let testCaseInfo = config.TEST_CASE[caseIndex];
+        config.CURRENT_CASE = testCaseInfo.index;
+        config.setSceneArgs(testCaseInfo);
+        cc.director.loadScene(testCaseInfo.scene);     
     },
 
     _getSN: function () {
@@ -81,6 +96,6 @@ cc.Class({
         sn += time.getFullYear() + "" + _prefixInteger((time.getMonth() + 1), 2) + "" + _prefixInteger(time.getDate(), 2);
         sn += _prefixInteger(ebSN, 4);
         return sn;
-    }
+    },
     
 });
