@@ -178,6 +178,11 @@ config.TEST_CASE = [
         scene: "uiTest",
         auto: true,
     },
+    {
+        name: "Spine Test",
+        scene: "spine",
+        auto: true,
+    },
 ];
 
 config.setSceneArgs = function (testCaseInfo) {
